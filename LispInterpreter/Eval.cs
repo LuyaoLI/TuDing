@@ -11,7 +11,6 @@ namespace LispInterpreter
         public static Value eval(Object parseTree, Env env)
         {
             NumValue sumVal = null;
-            int sum = 0;
             if (parseTree is List<Object>)
             {
                 Object obj = ((List<Object>)parseTree).ElementAt(0);
@@ -20,17 +19,20 @@ namespace LispInterpreter
 					switch ((String)obj) {
 					case "+":
 						{
-							for (int j = 1; j < ((List<Object>)parseTree).Count (); j++) {
-								Object nextParseTree = ((List<Object>)parseTree).ElementAt (j);
-								Value val = eval (nextParseTree, env);
-								if (val is NumValue) {
-									sum += ((NumValue)val).value;
-								}
-							}
-							sumVal = new NumValue (sum);
-							break;
+							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 + v2));
 						}
-					//TODO - * /  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+					case "-":
+						{
+							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 - v2));
+						}
+					case "*":
+						{
+							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 * v2));
+						}
+					case "/":
+						{
+							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 / v2));
+						}
 					case "=": 
 						{
 							return new BoolValue(EvalEqualNum (parseTree, env));
@@ -136,7 +138,6 @@ namespace LispInterpreter
 							return eval (((List<Object>)parseTree)[2], newEnv);
 						}
 					}
-                    return sumVal;
                 }
                 else if (obj is List<Object>) 
                 {
@@ -193,6 +194,15 @@ namespace LispInterpreter
 			return values
 				.Zip (values.Skip (1), comparator)
 				.All (b => b);
+		}
+
+		public static int EvalFoldr(Object parseTree, Env env, Func<int, int, int> accumulator) {
+			var values = ((List<Object>)parseTree)
+				.Skip (1)
+				.Select(elem => ((NumValue) eval(elem, env)).value)
+				.ToList ();
+			return values
+				.Aggregate (accumulator);
 		}
     }
 }

@@ -71,11 +71,11 @@ namespace LispInterpreter
 
     class Execute
     {
-        static void Main(string[] args)
+        /*static void Main(string[] args)
         {
             Parse parse = new Parse("(define fib (lambda (n)(if (< n 2)1 (+ (fib (- n 1)) (fib (- n 2))))))");
             parse.showParseTree("", parse.parseTree);
             Console.ReadLine();
-        }
+        }*/
     }
 }

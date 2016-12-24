@@ -129,34 +129,25 @@ namespace LispInterpreter
 						}
 					case "let":
 						{
-							List<Object> clauses = (List<Object>) ((List<Object>)parseTree).ElementAt (1);
+							List<Object> clauses = (List<Object>)((List<Object>)parseTree).ElementAt (1);
 							var pairs = new List<Tuple<String, Value>> ();
 							foreach (List<Object> pair in clauses) {
 								pairs.Add (new Tuple<String, Value> ((String)pair [0], eval (pair [1], env)));
 							}
 							Env newEnv = Env.ExtendEnv (pairs, env);
-							return eval (((List<Object>)parseTree)[2], newEnv);
+							return eval (((List<Object>)parseTree) [2], newEnv);
+						}
+					default:
+						{
+							Closure c = (Closure) eval (obj, env);
+							return EvalClosure (parseTree, env, c);
 						}
 					}
                 }
                 else if (obj is List<Object>) 
                 {
                     Value value = eval(obj, env);
-                    if (value is Closure) 
-                    {
-                        int length = ((Closure)value).param.Length;
-                        if (((List<Object>)parseTree).Count() != length + 1) throw new Exception("Params num insuiable");
-                        Closure closure = (Closure)value;
-                        List<Tuple<String, Value>> newEnv = new List<Tuple<string, Value>>();
-                        for (int k = 1; k < ((List<Object>)parseTree).Count(); k++) 
-                        {
-                            Value val = eval(((List<Object>)parseTree)[k], env);
-                            String str = (String)(closure.param[k-1]);
-                            newEnv.Add(new Tuple<String, Value>(str, val));
-                        }
-                        Env tmpEnv = Env.ExtendEnv(newEnv, closure.env);
-                        return eval(closure.exp, tmpEnv);
-                    }
+					return EvalClosure (parseTree, env, (Closure)value);
                 }
                     
             }
@@ -176,7 +167,14 @@ namespace LispInterpreter
             }
             return null;
         }
+		public static Value evalSequence(Object parseTree, Env env) {
+			var result = ((List<Object>)parseTree).Select (elem => eval (elem, env));
+			return result.Last ();
+		}
 
+		public static Value evalProgaram(Object program) {
+			return evalSequence (program, new Env());
+		}
 		public static Boolean EvalEqualNum(Object parseTree, Env env) {
 			var tokens = ((List<Object>)parseTree)
 				.Skip (1).ToList ();
@@ -203,6 +201,22 @@ namespace LispInterpreter
 				.ToList ();
 			return values
 				.Aggregate (accumulator);
+		}
+
+		public static Value EvalClosure (Object parseTree, Env env, Closure value)
+		{
+			int length = ((Closure)value).param.Length;
+			if (((List<Object>)parseTree).Count () != length + 1)
+				throw new Exception ("Params num insuiable");
+			Closure closure = (Closure)value;
+			List<Tuple<String, Value>> newEnv = new List<Tuple<string, Value>> ();
+			for (int k = 1; k < ((List<Object>)parseTree).Count (); k++) {
+				Value val = eval (((List<Object>)parseTree) [k], env);
+				String str = (String)(closure.param [k - 1]);
+				newEnv.Add (new Tuple<String, Value> (str, val));
+			}
+			Env tmpEnv = Env.ExtendEnv (newEnv, closure.env);
+			return eval (closure.exp, tmpEnv);
 		}
     }
 }

@@ -31,6 +31,30 @@ namespace LispInterpreter
 							break;
 						}
 					//TODO - * /  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+					case "=": 
+						{
+							return new BoolValue(EvalEqualNum (parseTree, env));
+						}
+					case "!=":
+						{
+							return new BoolValue (!EvalEqualNum (parseTree, env));
+						}
+					case ">":
+						{
+							return new BoolValue (EvalCompare (parseTree, env, (a, b) => a > b));
+						}
+					case "<=":
+						{
+							return new BoolValue (EvalCompare (parseTree, env, (a, b) => a <= b));
+						}
+					case "<" :
+						{
+							return new BoolValue(!EvalCompare (parseTree, env, (a, b) => a < b));
+						}
+					case ">=":
+						{
+							return new BoolValue (EvalCompare (parseTree, env, (a, b) => a >= b));
+						}
 					case "cond":
 						{
 							Object list = ((List<Object>)parseTree).ElementAt (1);
@@ -151,5 +175,24 @@ namespace LispInterpreter
             }
             return null;
         }
+
+		public static Boolean EvalEqualNum(Object parseTree, Env env) {
+			var tokens = ((List<Object>)parseTree)
+				.Skip (1).ToList ();
+			var firstVal = ((NumValue) eval (tokens [0], env)).value;
+			return !tokens.Skip(1)
+				.Select(elem => ((NumValue)eval(elem, env)).value)
+				.All(value => value != firstVal);
+		}
+
+		public static Boolean EvalCompare(Object parseTree, Env env, Func<int, int, bool> comparator) {
+			var values = ((List<Object>)parseTree)
+				.Skip (1)
+				.Select(elem => ((NumValue) eval(elem, env)).value)
+				.ToList ();
+			return values
+				.Zip (values.Skip (1), comparator)
+				.All (b => b);
+		}
     }
 }

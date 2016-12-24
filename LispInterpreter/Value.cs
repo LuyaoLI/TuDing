@@ -86,4 +86,22 @@ namespace LispInterpreter
             return "( " + val_1.ToString() + " . " + val_2.ToString() + " )";
         }
     }
+
+    class Closure :Value
+    {
+        public Env env { set; get; }
+        public Object exp { set; get; }
+        public Object[] param { set; get; }
+
+        public Closure() 
+        {
+        }
+
+        public Closure(Env env, Object exp, Object[] param) 
+        {
+            this.env = env;
+            this.exp = exp;
+            this.param = param;
+        }
+    }
 }

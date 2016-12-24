@@ -57,6 +57,13 @@ namespace LispInterpreter
 						{
 							return new BoolValue (EvalCompare (parseTree, env, (a, b) => a >= b));
 						}
+					case "define":
+						{
+							String name = (string) ((List<Object>)parseTree) [1];
+							Value val = eval (((List<Object>)parseTree) [2], env);
+							env.enviroment [name] = val;
+							return null;
+						}
 					case "cond":
 						{
 							Object list = ((List<Object>)parseTree).ElementAt (1);
@@ -168,7 +175,7 @@ namespace LispInterpreter
             return null;
         }
 		public static Value evalSequence(Object parseTree, Env env) {
-			var result = ((List<Object>)parseTree).Select (elem => eval (elem, env));
+			var result = ((List<Object>)parseTree).Select (elem => eval (elem, env)).ToList();
 			return result.Last ();
 		}
 

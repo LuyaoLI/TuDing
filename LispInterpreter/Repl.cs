@@ -12,7 +12,7 @@ namespace LispInterpreter
         {
           //  while (true) 
             //{ ( + 1 ( + 1 1 ))       (cond (( false 2 )( true nil ))   (cdr (car (cons (cons 1 2 ) 3)))  (eq? (atom ab) (atom abc))
-			String exp = "(+ 1 1) (+ 3 2)";
+			String exp = "(define f (lambda (x) (cond (((= x 0) 1) (true (* x (f (- x 1)))))))) (f 5)";
              Parse parse = new Parse(exp);
                 parse.showParseTree("",parse.parseTree);
 			Value value = Eval.evalProgaram (parse.parseTree);

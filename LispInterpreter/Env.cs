@@ -8,7 +8,7 @@ namespace LispInterpreter
 {
     class Env
     {
-        Dictionary<String, Value> enviroment { set; get; }
+        public Dictionary<String, Value> enviroment { set; get; }
         Env oldEnv { set; get; }
 
         public Env() 

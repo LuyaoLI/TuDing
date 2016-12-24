@@ -10,18 +10,28 @@ namespace LispInterpreter
     {
         public int eval(List<Object> parseTree, Closure closure) 
         {
+            int sum = 0;
             List<Object> list = new List<Object>();
             for (int i = 0; i < parseTree.Count(); i++)
             {
                 Object tmp = parseTree.ElementAt(i);
-                if (tmp.GetType().Equals(list.GetType())) 
+                String str = "";
+                if (tmp.GetType().Equals(list.GetType()))
                 {
-                    return 0;
+                    String opt = (String)((List<Object>)tmp).ElementAt(0);
+                    int result = eval((List<Object>)tmp, closure);
                 }
-           
+                else if (tmp.GetType().Equals(str.GetType()))
+                {
+                    String opt = (String)tmp;
+                    sum += int.Parse((String)tmp);
+                }
+                else 
+                {
+                    Console.WriteLine("ERROR HERE");
+                }
             }
-
-            return 0;
+            return sum;
         }
 
 

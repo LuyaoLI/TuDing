@@ -116,15 +116,30 @@ namespace LispInterpreter
 						}
 					case "eq?": 
 						{
-							Object nextParseTree = tokenList.ElementAt (1);
-							SymbolValue val_1_tmp = (SymbolValue)eval (nextParseTree, env);
-							for (int j = 2; j < tokenList.Count (); j++) {
-								Object nextParseTree_ = tokenList.ElementAt (j);
-								SymbolValue val_2_tmp = (SymbolValue)eval (nextParseTree_, env);
-								if (!val_1_tmp.Equals (val_2_tmp))
-									return new BoolValue (false);
+							if (tokenList.Count != 3) {
+								throw new Exception ("Wrong Argument For Eq?");
 							}
-							return new BoolValue (true);                               
+							Value v1 = eval(tokenList [1], env);
+							Value v2 = eval(tokenList [2], env);
+							if (v1.GetType().Equals(v2.GetType())) {
+								if (v1 is NilValue) {
+									return new BoolValue (true);
+								}
+								if (v1 is SymbolValue) {
+									return new BoolValue(((SymbolValue)v1).value
+										== ((SymbolValue)v2).value);
+								}
+								if (v1 is NumValue) {
+									return new BoolValue (((NumValue)v1).value
+										== ((NumValue)v2).value);
+								} 
+								if (v1 is BoolValue) {
+									return new BoolValue (((BoolValue)v1).value
+									== ((BoolValue)v2).value);
+								}
+								return new BoolValue (v1 == v2);
+							}
+							return new BoolValue (false);                               
 						}
 					case "lambda": 
 						{

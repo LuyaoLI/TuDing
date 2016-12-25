@@ -46,7 +46,6 @@
     <Compile Include="Eval.cs" />
     <Compile Include="Parse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Repl.cs" />
     <Compile Include="Value.cs" />
     <Compile Include="Tuding.cs" />
   </ItemGroup>

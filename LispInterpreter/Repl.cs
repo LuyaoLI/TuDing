@@ -9,14 +9,16 @@ namespace LispInterpreter
 	class Repl
 	{
    
-		static void Main (String[] args)
+		public static void Main (String[] args)
 		{
+			Env env = new Env ();
+			Console.WriteLine ("TuDing Lisp Interpreter REPL");
 			while (true) {
+				Console.Write (">>");
 				String exp = Console.ReadLine();
 				Parse parse = new Parse (exp);
-				Value value = Eval.evalProgaram (parse.parseTree);
+				Value value = Eval.evalProgaram (parse.parseTree, env);
 				Console.WriteLine (value.ToString ());
-				Console.ReadLine ();
 			}   
 		}
 	}

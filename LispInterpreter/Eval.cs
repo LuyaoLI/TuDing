@@ -10,8 +10,8 @@ namespace LispInterpreter
 	{
 		public static Value eval (Object parseTree, Env env)
 		{
-			NumValue sumVal = null;
 			if (parseTree is List<Object>) {
+				List<Object> tokenList = parseTree as List<Object>;
 				Object obj = ((List<Object>)parseTree).ElementAt (0);
 				if (obj is String) { // operator processing
 					switch ((String)obj) {
@@ -57,14 +57,14 @@ namespace LispInterpreter
 						}
 					case "define":
 						{
-							String name = (string)((List<Object>)parseTree) [1];
-							Value val = eval (((List<Object>)parseTree) [2], env);
+							String name = (string)tokenList [1];
+							Value val = eval (tokenList [2], env);
 							env.enviroment [name] = val;
 							return new Void();
 						}
 					case "cond":
 						{
-							Object list = ((List<Object>)parseTree).ElementAt (1);
+							Object list = tokenList.ElementAt (1);
 							if (list is List<Object>) {
                                     
 								for (int k = 0; k < ((List<Object>)list).Count (); k++) {
@@ -79,9 +79,9 @@ namespace LispInterpreter
 						}
 					case "cons":
 						{
-							if (((List<Object>)parseTree).Count () == 3) {
-								Object list1 = ((List<Object>)parseTree).ElementAt (1);
-								Object list2 = ((List<Object>)parseTree).ElementAt (2);
+							if (tokenList.Count () == 3) {
+								Object list1 = tokenList.ElementAt (1);
+								Object list2 = tokenList.ElementAt (2);
 								Value val_1 = eval (list1, env);
 								Value val_2 = eval (list2, env);
 								return new PairValue (val_1, val_2);
@@ -90,8 +90,8 @@ namespace LispInterpreter
 						}
 					case "car":
 						{
-							if (((List<Object>)parseTree).Count () == 2) {
-								Object list1 = ((List<Object>)parseTree).ElementAt (1);
+							if (tokenList.Count () == 2) {
+								Object list1 = tokenList.ElementAt (1);
 								PairValue pairVal = (PairValue)eval (list1, env);
 								return pairVal.val_1;
 							}
@@ -99,8 +99,8 @@ namespace LispInterpreter
 						}
 					case "cdr":
 						{
-							if (((List<Object>)parseTree).Count () == 2) {
-								Object list1 = ((List<Object>)parseTree).ElementAt (1);
+							if (tokenList.Count () == 2) {
+								Object list1 = tokenList.ElementAt (1);
 								PairValue pairVal = (PairValue)eval (list1, env);
 								return pairVal.val_2;
 							}
@@ -108,18 +108,18 @@ namespace LispInterpreter
 						}
 					case "atom": 
 						{
-							if (((List<Object>)parseTree).Count () == 2) {
-								Object list1 = ((List<Object>)parseTree).ElementAt (1);
+							if (tokenList.Count () == 2) {
+								Object list1 = tokenList.ElementAt (1);
 								return new SymbolValue ((String)list1);
 							}
 							break;
 						}
 					case "eq?": 
 						{
-							Object nextParseTree = ((List<Object>)parseTree).ElementAt (1);
+							Object nextParseTree = tokenList.ElementAt (1);
 							SymbolValue val_1_tmp = (SymbolValue)eval (nextParseTree, env);
-							for (int j = 2; j < ((List<Object>)parseTree).Count (); j++) {
-								Object nextParseTree_ = ((List<Object>)parseTree).ElementAt (j);
+							for (int j = 2; j < tokenList.Count (); j++) {
+								Object nextParseTree_ = tokenList.ElementAt (j);
 								SymbolValue val_2_tmp = (SymbolValue)eval (nextParseTree_, env);
 								if (!val_1_tmp.Equals (val_2_tmp))
 									return new BoolValue (false);
@@ -128,24 +128,28 @@ namespace LispInterpreter
 						}
 					case "lambda": 
 						{
-							Object[] paramList = ((List<Object>)((List<Object>)parseTree).ElementAt (1)).ToArray ();
-							Object exp = ((List<Object>)parseTree).ElementAt (2);
+							Object[] paramList = ((List<Object>)tokenList.ElementAt (1)).ToArray ();
+							Object exp = tokenList.ElementAt (2);
 							return new Closure (env, exp, paramList);
 						}
 					case "let":
 						{
-							List<Object> clauses = (List<Object>)((List<Object>)parseTree).ElementAt (1);
+							List<Object> clauses = (List<Object>)tokenList.ElementAt (1);
 							var pairs = new List<Tuple<String, Value>> ();
 							foreach (List<Object> pair in clauses) {
 								pairs.Add (new Tuple<String, Value> ((String)pair [0], eval (pair [1], env)));
 							}
 							Env newEnv = Env.ExtendEnv (pairs, env);
-							return eval (((List<Object>)parseTree) [2], newEnv);
+							return eval (tokenList [2], newEnv);
 						}
 					default:
 						{
+							try {
 							Closure c = (Closure)eval (obj, env);
-							return EvalClosure (parseTree, env, c);
+								return EvalClosure (parseTree, env, c);
+							} catch (InvalidCastException e) {
+								throw new Exception (String.Format ("Unresolved Name: {0} isn's a valid procedure.", obj as string));
+							}
 						}
 					}
 				} else if (obj is List<Object>) {
@@ -175,9 +179,9 @@ namespace LispInterpreter
 			return result.Last ();
 		}
 
-		public static Value evalProgaram (Object program)
+		public static Value evalProgaram (Object program, Env env)
 		{
-			return evalSequence (program, new Env ());
+			return evalSequence (program, env);
 		}
 
 		public static Boolean EvalEqualNum (Object parseTree, Env env)

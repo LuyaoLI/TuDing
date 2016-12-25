@@ -6,102 +6,114 @@ using System.Threading.Tasks;
 
 namespace LispInterpreter
 {
-    class Value
-    {
-    }
+	class Value
+	{
+	}
 
-    class NumValue : Value 
-    {
-        public int value { set; get; }
+	class NumValue : Value
+	{
+		public int value { set; get; }
 
-        public NumValue(int value) 
-        {
-            this.value = value;
-        }
-       
-        public override String ToString() 
-        {
-            return value.ToString();
-        }
+		public NumValue (int value)
+		{
+			this.value = value;
+		}
 
-    }
+		public override String ToString ()
+		{
+			return value.ToString ();
+		}
 
-    class SymbolValue : Value 
-    {
-        public String value { set; get; }
+	}
 
-        public SymbolValue(String value) 
-        {
-            this.value = value;
-        }
+	class SymbolValue : Value
+	{
+		public String value { set; get; }
 
-        public Boolean Equals(SymbolValue val_2) 
-        {
-            if (this.value.Equals(val_2.value))
-                return true;
-            else return false;
-        }
+		public SymbolValue (String value)
+		{
+			this.value = value;
+		}
 
-        public override String ToString() 
-        {
-            return "\'"+value;
-        }
-    }
+		public Boolean Equals (SymbolValue val_2)
+		{
+			if (this.value.Equals (val_2.value))
+				return true;
+			else
+				return false;
+		}
 
-    class BoolValue : Value 
-    {
-        public Boolean value { set; get; }
-        public BoolValue(Boolean value) 
-        {
-            this.value = value;
-        }
+		public override String ToString ()
+		{
+			return "\'" + value;
+		}
+	}
 
-        public override String ToString() 
-        {
-            return value.ToString();
-        }
-    }
+	class BoolValue : Value
+	{
+		public Boolean value { set; get; }
 
-    class NilValue : Value 
-    {
-        public override String ToString()
-        {
-            return "nil";
-        }
-    }
+		public BoolValue (Boolean value)
+		{
+			this.value = value;
+		}
 
-    class PairValue : Value 
-    {
-        public Value val_1 { set; get; }
-        public Value val_2 { set; get; }
+		public override String ToString ()
+		{
+			return value.ToString ();
+		}
+	}
 
-        public PairValue(Value val_1, Value val_2) 
-        {
-            this.val_1 = val_1;
-            this.val_2 = val_2;
-        }
+	class NilValue : Value
+	{
+		public override String ToString ()
+		{
+			return "nil";
+		}
+	}
 
-        public override String ToString()
-        {
-            return "( " + val_1.ToString() + " . " + val_2.ToString() + " )";
-        }
-    }
+	class PairValue : Value
+	{
+		public Value val_1 { set; get; }
 
-    class Closure :Value
-    {
-        public Env env { set; get; }
-        public Object exp { set; get; }
-        public Object[] param { set; get; }
+		public Value val_2 { set; get; }
 
-        public Closure() 
-        {
-        }
+		public PairValue (Value val_1, Value val_2)
+		{
+			this.val_1 = val_1;
+			this.val_2 = val_2;
+		}
 
-        public Closure(Env env, Object exp, Object[] param) 
-        {
-            this.env = env;
-            this.exp = exp;
-            this.param = param;
-        }
-    }
+		public override String ToString ()
+		{
+			return "( " + val_1.ToString () + " . " + val_2.ToString () + " )";
+		}
+	}
+
+	class Void : Value {
+		public override string ToString ()
+		{
+			return string.Format ("[Void]");
+		}
+	}
+
+	class Closure :Value
+	{
+		public Env env { set; get; }
+
+		public Object exp { set; get; }
+
+		public Object[] param { set; get; }
+
+		public Closure ()
+		{
+		}
+
+		public Closure (Env env, Object exp, Object[] param)
+		{
+			this.env = env;
+			this.exp = exp;
+			this.param = param;
+		}
+	}
 }

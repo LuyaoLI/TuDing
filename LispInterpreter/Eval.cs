@@ -6,36 +6,34 @@ using System.Threading.Tasks;
 
 namespace LispInterpreter
 {
-    class Eval
-    {
-        public static Value eval(Object parseTree, Env env)
-        {
-            NumValue sumVal = null;
-            if (parseTree is List<Object>)
-            {
-                Object obj = ((List<Object>)parseTree).ElementAt(0);
-                if (obj is String) // operator processing
-                {
+	class Eval
+	{
+		public static Value eval (Object parseTree, Env env)
+		{
+			NumValue sumVal = null;
+			if (parseTree is List<Object>) {
+				Object obj = ((List<Object>)parseTree).ElementAt (0);
+				if (obj is String) { // operator processing
 					switch ((String)obj) {
 					case "+":
 						{
-							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 + v2));
+							return new NumValue (EvalFoldr (parseTree, env, (v1, v2) => v1 + v2));
 						}
 					case "-":
 						{
-							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 - v2));
+							return new NumValue (EvalFoldr (parseTree, env, (v1, v2) => v1 - v2));
 						}
 					case "*":
 						{
-							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 * v2));
+							return new NumValue (EvalFoldr (parseTree, env, (v1, v2) => v1 * v2));
 						}
 					case "/":
 						{
-							return new NumValue(EvalFoldr (parseTree, env, (v1, v2) => v1 / v2));
+							return new NumValue (EvalFoldr (parseTree, env, (v1, v2) => v1 / v2));
 						}
 					case "=": 
 						{
-							return new BoolValue(EvalEqualNum (parseTree, env));
+							return new BoolValue (EvalEqualNum (parseTree, env));
 						}
 					case "!=":
 						{
@@ -49,9 +47,9 @@ namespace LispInterpreter
 						{
 							return new BoolValue (EvalCompare (parseTree, env, (a, b) => a <= b));
 						}
-					case "<" :
+					case "<":
 						{
-							return new BoolValue(!EvalCompare (parseTree, env, (a, b) => a < b));
+							return new BoolValue (!EvalCompare (parseTree, env, (a, b) => a < b));
 						}
 					case ">=":
 						{
@@ -59,10 +57,10 @@ namespace LispInterpreter
 						}
 					case "define":
 						{
-							String name = (string) ((List<Object>)parseTree) [1];
+							String name = (string)((List<Object>)parseTree) [1];
 							Value val = eval (((List<Object>)parseTree) [2], env);
 							env.enviroment [name] = val;
-							return null;
+							return new Void();
 						}
 					case "cond":
 						{
@@ -146,65 +144,68 @@ namespace LispInterpreter
 						}
 					default:
 						{
-							Closure c = (Closure) eval (obj, env);
+							Closure c = (Closure)eval (obj, env);
 							return EvalClosure (parseTree, env, c);
 						}
 					}
-                }
-                else if (obj is List<Object>) 
-                {
-                    Value value = eval(obj, env);
+				} else if (obj is List<Object>) {
+					Value value = eval (obj, env);
 					return EvalClosure (parseTree, env, (Closure)value);
-                }
+				}
                     
-            }
-            else if (parseTree is String)
-            {
-                if (((String)parseTree).Equals("false"))
-                    return new BoolValue(false);
-                if (((String)parseTree).Equals("true"))
-                    return new BoolValue(true);
-                if (((String)parseTree).Equals("nil"))
-                    return new NilValue();
-                try {
-                    return new NumValue(int.Parse((String)parseTree));
-                } catch (Exception e){
-                    return env.LookupEnv((String)parseTree);
-                }
-            }
-            return null;
-        }
-		public static Value evalSequence(Object parseTree, Env env) {
-			var result = ((List<Object>)parseTree).Select (elem => eval (elem, env)).ToList();
+			} else if (parseTree is String) {
+				if (((String)parseTree).Equals ("false"))
+					return new BoolValue (false);
+				if (((String)parseTree).Equals ("true"))
+					return new BoolValue (true);
+				if (((String)parseTree).Equals ("nil"))
+					return new NilValue ();
+				try {
+					return new NumValue (int.Parse ((String)parseTree));
+				} catch (Exception e) {
+					return env.LookupEnv ((String)parseTree);
+				}
+			}
+			return null;
+		}
+
+		public static Value evalSequence (Object parseTree, Env env)
+		{
+			var result = ((List<Object>)parseTree).Select (elem => eval (elem, env)).ToList ();
 			return result.Last ();
 		}
 
-		public static Value evalProgaram(Object program) {
-			return evalSequence (program, new Env());
-		}
-		public static Boolean EvalEqualNum(Object parseTree, Env env) {
-			var tokens = ((List<Object>)parseTree)
-				.Skip (1).ToList ();
-			var firstVal = ((NumValue) eval (tokens [0], env)).value;
-			return !tokens.Skip(1)
-				.Select(elem => ((NumValue)eval(elem, env)).value)
-				.All(value => value != firstVal);
+		public static Value evalProgaram (Object program)
+		{
+			return evalSequence (program, new Env ());
 		}
 
-		public static Boolean EvalCompare(Object parseTree, Env env, Func<int, int, bool> comparator) {
+		public static Boolean EvalEqualNum (Object parseTree, Env env)
+		{
+			var tokens = ((List<Object>)parseTree)
+				.Skip (1).ToList ();
+			var firstVal = ((NumValue)eval (tokens [0], env)).value;
+			return !tokens.Skip (1)
+				.Select (elem => ((NumValue)eval (elem, env)).value)
+				.All (value => value != firstVal);
+		}
+
+		public static Boolean EvalCompare (Object parseTree, Env env, Func<int, int, bool> comparator)
+		{
 			var values = ((List<Object>)parseTree)
 				.Skip (1)
-				.Select(elem => ((NumValue) eval(elem, env)).value)
+				.Select (elem => ((NumValue)eval (elem, env)).value)
 				.ToList ();
 			return values
 				.Zip (values.Skip (1), comparator)
 				.All (b => b);
 		}
 
-		public static int EvalFoldr(Object parseTree, Env env, Func<int, int, int> accumulator) {
+		public static int EvalFoldr (Object parseTree, Env env, Func<int, int, int> accumulator)
+		{
 			var values = ((List<Object>)parseTree)
 				.Skip (1)
-				.Select(elem => ((NumValue) eval(elem, env)).value)
+				.Select (elem => ((NumValue)eval (elem, env)).value)
 				.ToList ();
 			return values
 				.Aggregate (accumulator);
@@ -225,5 +226,5 @@ namespace LispInterpreter
 			Env tmpEnv = Env.ExtendEnv (newEnv, closure.env);
 			return eval (closure.exp, tmpEnv);
 		}
-    }
+	}
 }
